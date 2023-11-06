@@ -1,0 +1,44 @@
+# This is a basic workflow that is manually triggered
+
+name: Run Java Examples
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '35 22 * * *'
+  pull_request:
+    branches:
+      - trunk
+      paths:
+      - 'examples/java/**'
+   push:
+    branches:
+      - trunk
+    paths:
+      - 'examples/java/**'
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  test_examples:
+    strategy:
+      fail-fast: false
+    runs-on: windows-latest
+    
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Runs a single command using the runners shell
+     - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: 11
+    - name: Run Tests
+      uses: nick-invision/retry@v2.8.3
+      with:
+        timeout_minutes: 20
+        max_attempts: 3
+        command: |
+          cd examples/java
+          mvn -B test
